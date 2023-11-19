@@ -85,7 +85,7 @@ func match(ctx *Ctx, matchers []*Matcher) {
 		if ctx.Message.Text == "" && ctx.Message.Caption != "" {
 			ctx.Message.Text = ctx.Message.Caption
 			ctx.Message.Entities = ctx.Message.CaptionEntities
-			log.Println("cpoy Message Caption to Text:", ctx.Message.Text)
+			log.Println("copy Message Caption to Text:", ctx.Message.Text)
 		}
 	}
 	if ctx.Message != nil && ctx.Event.Type == "Message" && ctx.Message.Text != "" { // 确保无空
@@ -95,7 +95,8 @@ func match(ctx *Ctx, matchers []*Matcher) {
 				return true
 			}
 			name := ctx.Caller.Self.String()
-			if strings.HasPrefix(ctx.Message.Text, name) {
+			userSettedName := ctx.Caller.b.Botname
+			if strings.HasPrefix(ctx.Message.Text, name) || strings.HasPrefix(ctx.Message.Text, userSettedName) {
 				log.Debugln("[event] message before process:", ctx.Message.Text)
 				if len(ctx.Message.Entities) > 0 {
 					n := len(name)
@@ -134,7 +135,11 @@ func match(ctx *Ctx, matchers []*Matcher) {
 						}
 					}
 				}
-				ctx.Message.Text = strings.TrimLeft(ctx.Message.Text[len(name):], " ")
+				if strings.HasPrefix(ctx.Message.Text, name) {
+					ctx.Message.Text = strings.TrimLeft(ctx.Message.Text[len(name):], " ")
+				} else {
+					ctx.Message.Text = strings.TrimLeft(ctx.Message.Text[len(userSettedName):], " ")
+				}
 				log.Debugln("[event] message after process:", ctx.Message.Text)
 				return true
 			}
@@ -163,6 +168,9 @@ func match(ctx *Ctx, matchers []*Matcher) {
 							for _, e1 := range ctx.Message.Entities[i:] {
 								e1.Offset = o
 								o += e1.Length
+							}
+							if ctx.Message.Text == "" {
+								return true
 							}
 							if ctx.Message.Text[0] == ' ' {
 								n := 0
@@ -208,7 +216,7 @@ func match(ctx *Ctx, matchers []*Matcher) {
 					}
 				}
 			}
-			return strings.Contains(ctx.Message.Text, name)
+			return strings.Contains(ctx.Message.Text, name) || strings.Contains(ctx.Message.Text, userSettedName)
 		}(ctx)
 	}
 	log.Debugln("[event] is to me:", ctx.IsToMe)

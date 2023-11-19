@@ -34,14 +34,14 @@ var respLimiterManager = rate.NewManager[int64](time.Hour*24, 4)
 func init() {
 	process.NewCustomOnce(&m).Do(func() {
 		OnMessageCommandGroup([]string{
-			"响应", "response", "沉默", "silence",
+			"response", "silence",
 		}, UserOrGrpAdmin).SetBlock(true).Limit(func(ctx *Ctx) *rate.Limiter {
 			return respLimiterManager.Load(ctx.Message.Chat.ID)
 		}).secondPriority().Handle(func(ctx *Ctx) {
 			grp := ctx.Message.Chat.ID
 			msg := ""
 			switch ctx.State["command"] {
-			case "响应", "response":
+			case "response":
 				if m.CanResponse(grp) {
 					msg = ctx.Caller.Self.String() + "已经在工作了哦~"
 					break
@@ -418,7 +418,7 @@ func init() {
 			_, _ = ctx.SendPlainMessage(false, "已改变全局默认启用状态: ", model.Args)
 		})
 
-		OnMessageCommandGroup([]string{"用法", "usage"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
+		OnMessageCommandGroup([]string{"usage"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
 			Handle(func(ctx *Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
@@ -435,7 +435,7 @@ func init() {
 				}
 			})
 
-		OnMessageCommandGroup([]string{"服务列表", "service_list"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
+		OnMessageCommandGroup([]string{"service_list"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
 			Handle(func(ctx *Ctx) {
 				gid := ctx.Message.Chat.ID
 				m.RLock()
@@ -449,7 +449,7 @@ func init() {
 				_, _ = ctx.SendPlainMessage(false, msg...)
 			})
 
-		OnMessageCommandGroup([]string{"服务详情", "service_detail"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
+		OnMessageCommandGroup([]string{"service_detail"}, UserOrGrpAdmin).SetBlock(true).secondPriority().
 			Handle(func(ctx *Ctx) {
 				gid := ctx.Message.Chat.ID
 				m.RLock()

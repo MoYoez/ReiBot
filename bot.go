@@ -16,6 +16,8 @@ type Bot struct {
 	tgba.UpdateConfig
 	// SuperUsers 超级用户
 	SuperUsers []int64
+	// SetBotName
+	Botname string
 	// Debug 控制调试信息的输出与否
 	Debug bool
 	// Handler 注册对各种事件的处理
