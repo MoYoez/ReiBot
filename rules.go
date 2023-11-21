@@ -269,6 +269,15 @@ func OnlyToMe(ctx *Ctx) bool {
 	return ctx.IsToMe
 }
 
+func OnlyToMeOrToReply(ctx *Ctx) bool {
+	if ctx.Message.ReplyToMessage != nil {
+		if ctx.Message.ReplyToMessage.From.ID == ctx.Caller.Self.ID {
+			return true
+		}
+	}
+	return ctx.IsToMe
+}
+
 // CheckUser only triggered by specific person
 func CheckUser(userId ...int64) Rule {
 	return func(ctx *Ctx) bool {
