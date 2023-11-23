@@ -46,51 +46,13 @@ func init() {
 					msg = ctx.Caller.Self.String() + "已经在工作了哦~"
 					break
 				}
-				if SuperUserPermission(ctx) {
-					err := m.Response(grp)
-					if err == nil {
-						msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
-					} else {
-						msg = "ERROR: " + err.Error()
-					}
-					break
+				err := m.Response(grp)
+				if err == nil {
+					msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
+				} else {
+					msg = "ERROR: " + err.Error()
 				}
-				notify := &tgba.PhotoConfig{
-					BaseFile: tgba.BaseFile{
-						BaseChat: tgba.BaseChat{
-							ReplyMarkup: tgba.NewInlineKeyboardMarkup(
-								tgba.NewInlineKeyboardRow(
-									tgba.NewInlineKeyboardButtonData(
-										"同意",
-										"respermit"+fmt.Sprintf("%016x", uint64(grp)),
-									),
-									tgba.NewInlineKeyboardButtonData(
-										"拒绝",
-										"resrefuse"+fmt.Sprintf("%016x", uint64(grp)),
-									),
-								),
-							),
-						},
-						File: func() tgba.RequestFileData {
-							if ctx.Message.Chat.Photo != nil {
-								return tgba.FileID(ctx.Message.Chat.Photo.BigFileID)
-							}
-							p, err := ctx.Caller.GetUserProfilePhotos(tgba.NewUserProfilePhotos(ctx.Message.From.ID))
-							if err == nil && len(p.Photos) > 0 {
-								fp := p.Photos[0]
-								return tgba.FileID(fp[len(fp)-1].FileID)
-							}
-							return nil
-						}(),
-					},
-					Caption:   "主人, @" + ctx.Message.From.String() + " 请求响应~\n*ChatType*: " + ctx.Message.Chat.Type + "\n*ChatUserName*: " + ctx.Message.Chat.UserName + "\n*ChatID*: " + strconv.FormatInt(ctx.Message.Chat.ID, 10) + "\n*ChatTitle*: " + ctx.Message.Chat.Title + "\n*ChatDescription*: " + ctx.Message.Chat.Description,
-					ParseMode: "Markdown",
-				}
-				for _, id := range ctx.Caller.b.SuperUsers {
-					notify.ChatID = id
-					_, _ = ctx.Caller.Send(notify)
-				}
-				msg = "已将响应请求发给主人了, 请耐心等待回应哦~"
+				break
 			case "沉默", "silence":
 				if !m.CanResponse(grp) {
 					msg = ctx.Caller.Self.String() + "已经在休息了哦~"
@@ -102,79 +64,10 @@ func init() {
 				} else {
 					msg = "ERROR: " + err.Error()
 				}
-				if SuperUserPermission(ctx) {
-					break
-				}
-				notify := &tgba.PhotoConfig{
-					BaseFile: tgba.BaseFile{
-						File: func() tgba.RequestFileData {
-							if ctx.Message.Chat.Photo != nil {
-								return tgba.FileID(ctx.Message.Chat.Photo.BigFileID)
-							}
-							p, err := ctx.Caller.GetUserProfilePhotos(tgba.NewUserProfilePhotos(ctx.Message.From.ID))
-							if err == nil && len(p.Photos) > 0 {
-								fp := p.Photos[0]
-								return tgba.FileID(fp[len(fp)-1].FileID)
-							}
-							return nil
-						}(),
-					},
-					Caption:   "主人, @" + ctx.Message.From.String() + " 主动结束了响应~\n*ChatType*: " + ctx.Message.Chat.Type + "\n*ChatUserName*: " + ctx.Message.Chat.UserName + "\n*ChatID*: " + strconv.FormatInt(ctx.Message.Chat.ID, 10) + "\n*ChatTitle*: " + ctx.Message.Chat.Title + "\n*ChatDescription*: " + ctx.Message.Chat.Description,
-					ParseMode: "Markdown",
-				}
-				for _, id := range ctx.Caller.b.SuperUsers {
-					notify.ChatID = id
-					_, _ = ctx.Caller.Send(notify)
-				}
 			default:
 				msg = "ERROR: bad command\"" + fmt.Sprint(ctx.State["command"]) + "\""
 			}
 			_, _ = ctx.SendPlainMessage(false, msg)
-		})
-
-		OnCallbackQueryRegex(`^respermit([0-9a-f]{16})$`, SuperUserPermission).SetBlock(true).secondPriority().Handle(func(ctx *Ctx) {
-			grp, err := strconv.ParseUint(ctx.State["regex_matched"].([]string)[1], 16, 64)
-			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
-				return
-			}
-			msg := ""
-			err = m.Response(int64(grp))
-			if err == nil {
-				msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
-			} else {
-				msg = "ERROR: " + err.Error()
-			}
-			_, err = ctx.Caller.Send(&tgba.MessageConfig{
-				BaseChat: tgba.BaseChat{
-					ChatID: int64(grp),
-				},
-				Text: msg,
-			})
-			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
-				return
-			}
-			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
-		})
-
-		OnCallbackQueryRegex(`^resrefuse([0-9a-f]{16})$`, SuperUserPermission).SetBlock(true).secondPriority().Handle(func(ctx *Ctx) {
-			grp, err := strconv.ParseUint(ctx.State["regex_matched"].([]string)[1], 16, 64)
-			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
-				return
-			}
-			_, err = ctx.Caller.Send(&tgba.MessageConfig{
-				BaseChat: tgba.BaseChat{
-					ChatID: int64(grp),
-				},
-				Text: "很遗憾, 因为各种原因, 您暂时未获使用权限呢",
-			})
-			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
-				return
-			}
-			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
 		})
 
 		OnMessageCommandGroup([]string{
