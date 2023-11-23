@@ -356,6 +356,15 @@ func OnlyGroup(ctx *Ctx) bool {
 	return msg.Chat.Type == "group"
 }
 
+// OnlyGroupOrSuperGroup Tips: many groups use supergroup and only a few groups use Group Type.
+func OnlyGroupOrSuperGroup(ctx *Ctx) bool {
+	msg, ok := ctx.Value.(*tgba.Message)
+	if !ok || msg.Chat == nil { // 确保无空
+		return false
+	}
+	return msg.Chat.Type == "group" || msg.Chat.Type == "supergroup"
+}
+
 // OnlySuperGroup requires that the ctx.Event is supergroup message
 func OnlySuperGroup(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
