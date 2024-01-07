@@ -2,6 +2,7 @@ package rei
 
 import (
 	"reflect"
+	"runtime/debug"
 	"strings"
 
 	base14 "github.com/fumiama/go-base16384"
@@ -219,6 +220,13 @@ func match(ctx *Ctx, matchers []*Matcher) {
 			return strings.Contains(ctx.Message.Text, name) || strings.Contains(ctx.Message.Text, userSettedName)
 		}(ctx)
 	}
+
+	defer func() {
+		if pa := recover(); pa != nil {
+			log.Errorf("[bot] execute handler err: %v\n%v", pa, helper.BytesToString(debug.Stack()))
+		}
+	}()
+
 	log.Debugln("[event] is to me:", ctx.IsToMe)
 loop:
 	for _, matcher := range matchers {
