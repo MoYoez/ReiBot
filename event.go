@@ -201,12 +201,16 @@ func match(ctx *Ctx, matchers []*Matcher) {
 								}
 								ctx.Message.Text = ctx.Message.Text[:len(ctx.Message.Text)-n]
 								if len(ctx.Message.Entities) > 0 {
-									elast := ctx.Message.Entities[len(ctx.Message.Entities)-n]
-									if elast.Offset+elast.Length == len(u16txt)/2 {
-										if elast.Length > n {
-											elast.Length -= n
-										} else {
-											ctx.Message.Entities = ctx.Message.Entities[:len(ctx.Message.Entities)-1]
+									if len(ctx.Message.Entities)-n < 0 {
+										break
+									} else {
+										elast := ctx.Message.Entities[len(ctx.Message.Entities)-n]
+										if elast.Offset+elast.Length == len(u16txt)/2 {
+											if elast.Length > n {
+												elast.Length -= n
+											} else {
+												ctx.Message.Entities = ctx.Message.Entities[:len(ctx.Message.Entities)-1]
+											}
 										}
 									}
 								}
