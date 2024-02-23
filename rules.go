@@ -114,8 +114,9 @@ func CommandRule(commands ...string) Rule {
 		default:
 			return false
 		}
+		_, getCommand := SplitCommandTo(cmdMessage, 2)
 		for _, command := range commands {
-			if strings.HasPrefix(cmdMessage, command) {
+			if strings.HasPrefix(cmdMessage, command) && getCommand[0] == command {
 				ctx.State["command"] = command
 				ctx.State["args"] = args
 				return true
@@ -556,4 +557,10 @@ func MustProvidePhoto(needphohint, failhint string) Rule {
 			return true
 		}
 	}
+}
+
+// SplitCommandTo Split Command and Adjust To.
+func SplitCommandTo(raw string, setCommandStopper int) (splitCommandLen int, splitInfo []string) {
+	rawSplit := strings.SplitN(raw, " ", setCommandStopper)
+	return len(rawSplit), rawSplit
 }
