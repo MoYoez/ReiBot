@@ -80,11 +80,12 @@ func (ctx *Ctx) CheckSession() Rule {
 //	if replytosender {
 //		c.ReplyToMessageID = ctx.Message.MessageID
 //	}
-func (ctx *Ctx) Send(replytosender bool, c tgba.Chattable) (tgba.Message, error) {
+func (ctx *Ctx) Send(replytosender bool, c tgba.Chattable, parameters tgba.ReplyParameters) (tgba.Message, error) {
 	msg := reflect.ValueOf(c).Elem()
 	msg.FieldByName("ChatID").SetInt(ctx.Message.Chat.ID)
 	if replytosender {
-		msg.FieldByName("ReplyToMessageID").SetInt(int64(ctx.Message.MessageID))
+		// ctx.Message.MessageID
+		msg.FieldByName("ReplyParameters").FieldByName("MessageID").SetInt(int64(ctx.Message.MessageID))
 	}
 	return ctx.Caller.Send(c)
 }
