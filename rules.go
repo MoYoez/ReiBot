@@ -314,7 +314,7 @@ func CheckChat(chatId ...int64) Rule {
 	return func(ctx *Ctx) bool {
 		switch msg := ctx.Value.(type) {
 		case *tgba.Message:
-			if msg.Chat == nil { // 确保无空
+			if msg.Chat.ID == 0 { // 确保无空
 				return false
 			}
 			for _, cid := range chatId {
@@ -324,7 +324,7 @@ func CheckChat(chatId ...int64) Rule {
 			}
 			return false
 		case *tgba.CallbackQuery:
-			if msg.Message == nil || msg.Message.Chat == nil {
+			if msg.Message == nil || msg.Message.Chat.ID == 0 {
 				return false
 			}
 			for _, cid := range chatId {
@@ -342,7 +342,7 @@ func CheckChat(chatId ...int64) Rule {
 // OnlyPrivate requires that the ctx.Event is private message
 func OnlyPrivate(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "private"
@@ -351,7 +351,7 @@ func OnlyPrivate(ctx *Ctx) bool {
 // OnlyGroup requires that the ctx.Event is group message
 func OnlyGroup(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "group"
@@ -360,7 +360,7 @@ func OnlyGroup(ctx *Ctx) bool {
 // OnlyGroupOrSuperGroup Tips: many groups use supergroup and only a few groups use Group Type.
 func OnlyGroupOrSuperGroup(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "group" || msg.Chat.Type == "supergroup"
@@ -369,7 +369,7 @@ func OnlyGroupOrSuperGroup(ctx *Ctx) bool {
 // OnlySuperGroup requires that the ctx.Event is supergroup message
 func OnlySuperGroup(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "supergroup"
@@ -378,7 +378,7 @@ func OnlySuperGroup(ctx *Ctx) bool {
 // OnlyPublic requires that the ctx.Event is group or supergroup message
 func OnlyPublic(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "supergroup" || msg.Chat.Type == "group"
@@ -387,7 +387,7 @@ func OnlyPublic(ctx *Ctx) bool {
 // OnlyChannel requires that the ctx.Event is channel message
 func OnlyChannel(ctx *Ctx) bool {
 	msg, ok := ctx.Value.(*tgba.Message)
-	if !ok || msg.Chat == nil { // 确保无空
+	if !ok || msg.Chat.ID == 0 { // 确保无空
 		return false
 	}
 	return msg.Chat.Type == "channel"
@@ -428,14 +428,14 @@ func CreaterPermission(ctx *Ctx) bool {
 	}
 	switch msg := ctx.Value.(type) {
 	case *tgba.Message:
-		if msg.From == nil || msg.Chat == nil { // 确保无空
+		if msg.From == nil || msg.Chat.ID == 0 { // 确保无空
 			return false
 		}
 		m, err := ctx.Caller.GetChatMember(
 			tgba.GetChatMemberConfig{
 				ChatConfigWithUser: tgba.ChatConfigWithUser{
-					ChatID: msg.Chat.ID,
-					UserID: msg.From.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: msg.Chat.ID},
+					UserID:     msg.From.ID,
 				},
 			},
 		)
@@ -444,14 +444,14 @@ func CreaterPermission(ctx *Ctx) bool {
 		}
 		return m.IsCreator()
 	case *tgba.CallbackQuery:
-		if msg.From == nil || msg.Message == nil || msg.Message.Chat == nil {
+		if msg.From == nil || msg.Message == nil || msg.Message.Chat.ID == 0 {
 			return false
 		}
 		m, err := ctx.Caller.GetChatMember(
 			tgba.GetChatMemberConfig{
 				ChatConfigWithUser: tgba.ChatConfigWithUser{
-					ChatID: msg.Message.Chat.ID,
-					UserID: msg.From.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: msg.Message.Chat.ID},
+					UserID:     msg.From.ID,
 				},
 			},
 		)
@@ -471,14 +471,14 @@ func AdminPermission(ctx *Ctx) bool {
 	}
 	switch msg := ctx.Value.(type) {
 	case *tgba.Message:
-		if msg.From == nil || msg.Chat == nil { // 确保无空
+		if msg.From == nil || msg.Chat.ID == 0 { // 确保无空
 			return false
 		}
 		m, err := ctx.Caller.GetChatMember(
 			tgba.GetChatMemberConfig{
 				ChatConfigWithUser: tgba.ChatConfigWithUser{
-					ChatID: msg.Chat.ID,
-					UserID: msg.From.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: msg.Chat.ID},
+					UserID:     msg.From.ID,
 				},
 			},
 		)
@@ -487,14 +487,14 @@ func AdminPermission(ctx *Ctx) bool {
 		}
 		return m.IsCreator() || m.IsAdministrator()
 	case *tgba.CallbackQuery:
-		if msg.From == nil || msg.Message == nil || msg.Message.Chat == nil {
+		if msg.From == nil || msg.Message == nil || msg.Message.Chat.ID == 0 {
 			return false
 		}
 		m, err := ctx.Caller.GetChatMember(
 			tgba.GetChatMemberConfig{
 				ChatConfigWithUser: tgba.ChatConfigWithUser{
-					ChatID: msg.Message.Chat.ID,
-					UserID: msg.From.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: msg.Message.Chat.ID},
+					UserID:     msg.From.ID,
 				},
 			},
 		)

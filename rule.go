@@ -189,7 +189,7 @@ func init() {
 								service.Permit(uid, grp)
 								msg += "\n+ 已允许" + usr
 							} else {
-								member, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatID: ctx.Message.Chat.ID, UserID: uid}})
+								member, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}, UserID: uid}})
 								if err == nil && !member.HasLeft() && !member.WasKicked() {
 									service.Permit(uid, grp)
 									msg += "\n+ 已允许" + usr
@@ -207,7 +207,7 @@ func init() {
 								service.Ban(uid, grp)
 								msg += "\n- 已禁止" + usr
 							} else {
-								member, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatID: ctx.Message.Chat.ID, UserID: uid}})
+								member, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}, UserID: uid}})
 								if err == nil && !member.HasLeft() && !member.WasKicked() {
 									service.Ban(uid, grp)
 									msg += "\n- 已禁止" + usr

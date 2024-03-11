@@ -67,7 +67,7 @@ func (ctx *Ctx) CheckSession() Rule {
 	msg := ctx.Value.(*tgba.Message)
 	return func(ctx2 *Ctx) bool {
 		msg2, ok := ctx.Value.(*tgba.Message)
-		if !ok || msg.From == nil || msg.Chat == nil || msg2.From == nil || msg2.Chat == nil { // 确保无空
+		if !ok || msg.From == nil || msg.Chat.ID == 0 || msg2.From == nil || msg2.Chat.ID == 0 { // 确保无空
 			return false
 		}
 		return msg.From.ID == msg2.From.ID && msg.Chat.ID == msg2.Chat.ID
@@ -93,7 +93,7 @@ func (ctx *Ctx) Send(replytosender bool, c tgba.Chattable) (tgba.Message, error)
 func (ctx *Ctx) SendPlainMessage(replytosender bool, printable ...any) (tgba.Message, error) {
 	msg := tgba.NewMessage(ctx.Message.Chat.ID, fmt.Sprint(printable...))
 	if replytosender {
-		msg.ReplyToMessageID = ctx.Message.MessageID
+		msg.ReplyParameters.MessageID = ctx.Message.MessageID
 	}
 	return ctx.Caller.Send(&msg)
 }
@@ -102,13 +102,13 @@ func (ctx *Ctx) SendPlainMessage(replytosender bool, printable ...any) (tgba.Mes
 func (ctx *Ctx) SendMessage(replytosender bool, text string, entities ...tgba.MessageEntity) (tgba.Message, error) {
 	msg := &tgba.MessageConfig{
 		BaseChat: tgba.BaseChat{
-			ChatID: ctx.Message.Chat.ID,
+			ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 		},
 		Text:     text,
 		Entities: entities,
 	}
 	if replytosender {
-		msg.ReplyToMessageID = ctx.Message.MessageID
+		msg.ReplyParameters.MessageID = ctx.Message.MessageID
 	}
 	return ctx.Caller.Send(msg)
 }
@@ -118,7 +118,7 @@ func (ctx *Ctx) SendPhoto(file tgba.RequestFileData, replytosender bool, caption
 	msg := &tgba.PhotoConfig{
 		BaseFile: tgba.BaseFile{
 			BaseChat: tgba.BaseChat{
-				ChatID: ctx.Message.Chat.ID,
+				ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 			},
 			File: file,
 		},
@@ -126,7 +126,7 @@ func (ctx *Ctx) SendPhoto(file tgba.RequestFileData, replytosender bool, caption
 		CaptionEntities: captionentities,
 	}
 	if replytosender {
-		msg.ReplyToMessageID = ctx.Message.MessageID
+		msg.ReplyParameters.MessageID = ctx.Message.MessageID
 	}
 	return ctx.Caller.Send(msg)
 }
@@ -136,7 +136,7 @@ func (ctx *Ctx) SendAudio(file tgba.RequestFileData, replytosender bool, caption
 	msg := tgba.AudioConfig{
 		BaseFile: tgba.BaseFile{
 			BaseChat: tgba.BaseChat{
-				ChatID: ctx.Message.Chat.ID,
+				ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 			},
 			File: file,
 		},
@@ -144,7 +144,7 @@ func (ctx *Ctx) SendAudio(file tgba.RequestFileData, replytosender bool, caption
 		CaptionEntities: captionentities,
 	}
 	if replytosender {
-		msg.ReplyToMessageID = ctx.Message.MessageID
+		msg.ReplyParameters.MessageID = ctx.Message.MessageID
 	}
 	return ctx.Caller.Send(&msg)
 }
@@ -154,7 +154,7 @@ func (ctx *Ctx) Block() {
 	ctx.ma.SetBlock(true)
 }
 
-// Block 在 pre, rules, mid 阶段阻止后续触发
+// Break Block 在 pre, rules, mid 阶段阻止后续触发
 func (ctx *Ctx) Break() {
 	ctx.ma.Break = true
 }
