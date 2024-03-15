@@ -231,6 +231,11 @@ func match(ctx *Ctx, matchers []*Matcher) {
 			return strings.Contains(ctx.Message.Text, name) || strings.Contains(ctx.Message.Text, userSettedName)
 		}(ctx)
 	}
+	if ctx.Event.Type == "MessageReaction" {
+		var tgbaMsg tgba.Message
+		tgbaMsg = tgba.Message{}
+		ctx.Message = &tgbaMsg // no msg here.
+	}
 	defer func() {
 		if pa := recover(); pa != nil {
 			log.Errorf("[bot] execute handler err: %v\n%v", pa, helper.BytesToString(debug.Stack()))
