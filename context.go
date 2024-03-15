@@ -12,7 +12,9 @@ type Ctx struct {
 	Event
 	State
 	Caller  *TelegramClient
-	Message *tgba.Message
+	Message *tgba.Message // msg can be null
+	Chat    *tgba.Chat    // Options
+	User    *tgba.User    // to event user.
 	ma      *Matcher
 	IsToMe  bool
 }

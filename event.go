@@ -70,6 +70,8 @@ func (tc *TelegramClient) processEvent(update tgba.Update) {
 			case "MessageReaction":
 				c := (*tgba.MessageReactionUpdated)(f.UnsafePointer())
 				ctx.Message = nil
+				ctx.User = c.User
+				ctx.Chat = c.ActorChat
 				if c.User == nil {
 					c.User = &tgba.User{}
 				}
@@ -230,11 +232,6 @@ func match(ctx *Ctx, matchers []*Matcher) {
 			}
 			return strings.Contains(ctx.Message.Text, name) || strings.Contains(ctx.Message.Text, userSettedName)
 		}(ctx)
-	}
-	if ctx.Event.Type == "MessageReaction" {
-		var tgbaMsg tgba.Message
-		tgbaMsg = tgba.Message{}
-		ctx.Message = &tgbaMsg // no msg here.
 	}
 	defer func() {
 		if pa := recover(); pa != nil {
