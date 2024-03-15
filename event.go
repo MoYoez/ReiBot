@@ -67,6 +67,12 @@ func (tc *TelegramClient) processEvent(update tgba.Update) {
 					c.From = &tgba.User{}
 				}
 				log.Println("receive CallbackQuery Data from", c.From.ID, ":", c.Data)
+			case "MessageReaction":
+				c := (*tgba.MessageReactionUpdated)(f.UnsafePointer())
+				if c.User == nil {
+					c.User = &tgba.User{}
+				}
+				log.Println("Receive User Reaction Act from", c.User.ID, ":", c.NewReaction)
 			}
 			go match(ctx, matchers)
 			continue
