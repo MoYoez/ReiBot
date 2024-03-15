@@ -180,11 +180,11 @@ func OnMessagePrefix(prefix string, rules ...Rule) *Matcher {
 
 // OnMessageReactionUpdated React Action Updated
 func (e *Engine) OnMessageReactionUpdated(rules ...Rule) *Matcher {
-	return e.On("MessageReactionUpdated", rules...)
+	return e.On("MessageReaction", rules...)
 }
 
 // OnMessageReactionUpdated React Action Updated
-func OnMessageReactionUpdated(rules ...Rule) *Matcher { return On("MessageReactionUpdated", rules...) }
+func OnMessageReactionUpdated(rules ...Rule) *Matcher { return On("MessageReaction", rules...) }
 
 // OnMessagePrefix 前缀触发器
 func (e *Engine) OnMessagePrefix(prefix string, rules ...Rule) *Matcher {
