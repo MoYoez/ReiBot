@@ -36,4 +36,6 @@ type Handler struct {
 	OnChatMember func(updateid int, bot *TelegramClient, m *tgba.ChatMemberUpdated)
 
 	OnChatJoinRequest func(updateid int, bot *TelegramClient, r *tgba.ChatJoinRequest)
+
+	OnReactMessage func(updateid int, bot *TelegramClient, r *tgba.MessageReactionUpdated)
 }
