@@ -69,9 +69,7 @@ func (tc *TelegramClient) processEvent(update tgba.Update) {
 				log.Println("receive CallbackQuery Data from", c.From.ID, ":", c.Data)
 			case "MessageReaction":
 				c := (*tgba.MessageReactionUpdated)(f.UnsafePointer())
-				ctx.Chat = c.ActorChat
 				ctx.Message = nil
-				ctx.User = c.User
 				if c.User == nil {
 					c.User = &tgba.User{}
 				}
@@ -231,15 +229,6 @@ func match(ctx *Ctx, matchers []*Matcher) {
 				}
 			}
 			return strings.Contains(ctx.Message.Text, name) || strings.Contains(ctx.Message.Text, userSettedName)
-		}(ctx)
-	}
-	if ctx.Message == nil {
-		ctx.IsToMe = func(ctx *Ctx) bool {
-			if ctx.Message.Chat.IsPrivate() {
-				log.Debugln("[event] private event")
-				return true
-			}
-			return false
 		}(ctx)
 	}
 	defer func() {
