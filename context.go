@@ -13,6 +13,8 @@ type Ctx struct {
 	State
 	Caller  *TelegramClient
 	Message *tgba.Message
+	User    *tgba.User // Optional: No Anonymous
+	Chat    *tgba.Chat // Optional: Where it changed.
 	ma      *Matcher
 	IsToMe  bool
 }
