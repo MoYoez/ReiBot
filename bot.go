@@ -3,6 +3,7 @@ package rei
 
 import (
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"net/url"
 )
 
 // Bot bot 的配置
@@ -17,9 +18,13 @@ type Bot struct {
 	// SuperUsers 超级用户
 	SuperUsers []int64
 	// SetBotName
-	Botname string
+	BotName string
 	// Debug 控制调试信息的输出与否
 	Debug bool
+	// if bot needs response first, if not required, them pass message directly.
+	RequireAuth bool
+	// if bots required proxy to connect to Telegram API, fill this filed
+	UseProxy url.URL
 	// Handler 注册对各种事件的处理
 	Handler *Handler
 	// handlers 方便调用的 handler

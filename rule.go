@@ -49,55 +49,45 @@ func init() {
 			switch ctx.State["command"] {
 			case "response":
 				if m.CanResponse(grp) {
-					msg = ctx.Caller.Self.String() + "已经在工作了哦~"
+					if ctx.Caller.b.BotName != "" {
+						msg = ctx.Caller.b.BotName + "将开始在此工作啦~"
+					} else {
+						msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
+					}
 					break
 				}
 				err := m.Response(grp)
 				if err == nil {
-					msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
+					if ctx.Caller.b.BotName != "" {
+						msg = ctx.Caller.b.BotName + "将开始在此工作啦~"
+					} else {
+						msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
+					}
 				} else {
 					msg = "ERROR: " + err.Error()
 				}
 				break
 			case "沉默", "silence":
 				if !m.CanResponse(grp) {
-					msg = ctx.Caller.Self.String() + "已经在休息了哦~"
+					if ctx.Caller.b.BotName != "" {
+						msg = ctx.Caller.b.BotName + "已经在休息了哦~"
+					} else {
+						msg = ctx.Caller.Self.String() + "已经在休息了哦~"
+					}
 					break
 				}
 				err := m.Silence(grp)
 				if err == nil {
-					msg = ctx.Caller.Self.String() + "将开始休息啦~"
+					if ctx.Caller.b.BotName != "" {
+						msg = ctx.Caller.b.BotName + "已经在休息了哦~"
+					} else {
+						msg = ctx.Caller.Self.String() + "已经在休息了哦~"
+					}
 				} else {
 					msg = "ERROR: " + err.Error()
 				}
 			default:
 				msg = "ERROR: bad command\"" + fmt.Sprint(ctx.State["command"]) + "\""
-			}
-			_, _ = ctx.SendPlainMessage(false, msg)
-		})
-
-		OnMessageCommandGroup([]string{
-			"全局响应", "allresponse", "全局沉默", "allsilence",
-		}, SuperUserPermission).SetBlock(true).secondPriority().Handle(func(ctx *Ctx) {
-			msg := ""
-			cmd := ctx.State["command"].(string)
-			switch {
-			case strings.Contains(cmd, "响应") || strings.Contains(cmd, "response"):
-				err := m.Response(0)
-				if err == nil {
-					msg = ctx.Caller.Self.String() + "将开始在此工作啦~"
-				} else {
-					msg = "ERROR: " + err.Error()
-				}
-			case strings.Contains(cmd, "沉默") || strings.Contains(cmd, "silence"):
-				err := m.Silence(0)
-				if err == nil {
-					msg = ctx.Caller.Self.String() + "将开始休息啦~"
-				} else {
-					msg = "ERROR: " + err.Error()
-				}
-			default:
-				msg = "ERROR: bad command\"" + cmd + "\""
 			}
 			_, _ = ctx.SendPlainMessage(false, msg)
 		})

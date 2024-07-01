@@ -67,15 +67,6 @@ func (tc *TelegramClient) processEvent(update tgba.Update) {
 					c.From = &tgba.User{}
 				}
 				log.Println("receive CallbackQuery Data from", c.From.ID, ":", c.Data)
-			case "MessageReaction":
-				c := (*tgba.MessageReactionUpdated)(f.UnsafePointer())
-				ctx.Message = nil
-				ctx.User = c.User
-				ctx.Chat = c.ActorChat
-				if c.User == nil {
-					c.User = &tgba.User{}
-				}
-				log.Println("Receive User Reaction Act from", c.User.ID, ":", c.NewReaction)
 			}
 			go match(ctx, matchers)
 			continue
@@ -104,9 +95,15 @@ func match(ctx *Ctx, matchers []*Matcher) {
 				log.Debugln("[event] private event")
 				return true
 			}
+			var RequiredPached bool
 			name := ctx.Caller.Self.String()
-			userSettedName := ctx.Caller.b.Botname
-			if strings.HasPrefix(ctx.Message.Text, name) || strings.HasPrefix(ctx.Message.Text, userSettedName) {
+			userSettedName := ctx.Caller.b.BotName
+			if userSettedName != "" && strings.HasPrefix(ctx.Message.Text, userSettedName) {
+				RequiredPached = true
+			} else {
+				RequiredPached = false
+			}
+			if strings.HasPrefix(ctx.Message.Text, name) || RequiredPached {
 				log.Debugln("[event] message before process:", ctx.Message.Text)
 				if len(ctx.Message.Entities) > 0 {
 					n := len(name)
@@ -145,10 +142,11 @@ func match(ctx *Ctx, matchers []*Matcher) {
 						}
 					}
 				}
+				// replace first one, if one not in prefix, then replace the second one.
 				if strings.HasPrefix(ctx.Message.Text, name) {
 					ctx.Message.Text = strings.TrimLeft(ctx.Message.Text[len(name):], " ")
 				} else {
-					ctx.Message.Text = strings.TrimLeft(ctx.Message.Text[len(userSettedName):], " ")
+					ctx.Message.Text = strings.Replace(ctx.Message.Text, userSettedName, "", 1)
 				}
 				log.Debugln("[event] message after process:", ctx.Message.Text)
 				return true
